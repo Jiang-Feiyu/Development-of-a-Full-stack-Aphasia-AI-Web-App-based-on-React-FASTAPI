@@ -1,0 +1,62 @@
+/* Popup Container */
+.popup {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+  
+  /* Popup Content */
+  .popup-content {
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  /* Close Button Container */
+  .close-button-container {
+    text-align: center;
+  }
+  
+  /* Close Button */
+  .popup-content button {
+    background-color: #ff5555;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 20px;
+    cursor: pointer;
+    z-index: 1;
+  }
+  
+  .popup-content button:hover {
+    background-color: #ff3333;
+  }
+  
+  /* Close Button */
+.close-button {
+    background-color: #555;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 20px;
+    cursor: pointer;
+    z-index: 1;
+    margin-top: 20px; /* 距离内容的距离 */
+  }
+  
+  .close-button:hover {
+    background-color: #333;
+  }
