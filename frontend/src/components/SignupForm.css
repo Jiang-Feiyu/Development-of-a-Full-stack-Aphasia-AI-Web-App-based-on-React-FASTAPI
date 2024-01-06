@@ -14,15 +14,16 @@ button.small-grey {
 }
 
 .button_sign_up {
-  background-color: #ffffff;
+  background-color: #ffffff; /* 背景颜色为白色 */
   color: #000000;
   border: none;
   padding: 10px 20px;
-  margin: 0 10px; /* Updated margin value */
+  margin: 0 10px;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+
 .border {
   padding: 10px;
   border: 3px solid black;
@@ -33,7 +34,7 @@ button.small-grey {
 }
 
 .content-box {
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgb(255, 255, 255);
   padding: 30px;
   text-align: center;
 }
