@@ -62,3 +62,21 @@ def delete_user(user: User):
         json.dump(users_db, file, indent=2)
 
     return {"message": "User deleted successfully"}
+
+@app.post("/upload")
+async def upload_file(user: User, audio_file: UploadFile = File(...)):
+    # 检查用户是否存在
+    existing_user = next((u for u in users_db if u["usn"] == user.usn), None)
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # 处理上传的文件
+    file_contents = await audio_file.read()
+    audio_segment = AudioSegment.from_file(io.BytesIO(file_contents))
+
+    # 将文件保存为 WAV 格式
+    wav_file_path = f"uploads/{audio_file.filename.split('.')[0]}.wav"
+    audio_segment.export(wav_file_path, format="wav")
+
+    # 返回 WAV 文件的路径
+    return {"wavFileUrl": wav_file_path}
