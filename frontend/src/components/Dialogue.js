@@ -4,6 +4,56 @@ import "./Dialogue.css";
 const Dialogue = ({ username }) => {
   const [dialogue, setDialogue] = useState([]);
   const dialogueRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+
+  const startRecording = () => {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then((stream) => {
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            audioChunksRef.current.push(e.data);
+          }
+        };
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+
+          setDialogue([
+            ...dialogue,
+            { user: "User", message: "Start an Audio" },
+            { user: "System", message: "Audio uploaded", fileUrl: audioUrl },
+          ]);
+
+          audioChunksRef.current = [];
+        };
+
+        mediaRecorderRef.current = mediaRecorder;
+
+        // 检查录音是否已经开始
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === "inactive") {
+          mediaRecorderRef.current.start();
+          console.log("Recording started successfully");
+        } else {
+          console.log("Failed to start recording");
+        }
+      })
+      .catch((error) => {
+        console.error("Error starting recording:", error);
+      });
+  };
+
+  const stopRecording = () => {
+    // 检查录音是否已经停止
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+      console.log("Recording stopped successfully");
+    } else {
+      console.log("No recording to stop");
+    }
+  };
+
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -17,37 +67,40 @@ const Dialogue = ({ username }) => {
   const handleDrop = async (e) => {
     e.preventDefault();
     dialogueRef.current.classList.remove("drag-over");
-  
+
     const file = e.dataTransfer.files[0];
-  
+
     if (file && file.size <= 5 * 1024 * 1024) {
-      // Removed the code that sends a request to the backend
-  
       setDialogue([
         ...dialogue,
         { user: "User", message: `Upload an Audio: ${file.name}` },
-        { user: "System", message: `File selected: ${file.name}` }, // Adjusted the message accordingly
+        { user: "System", message: `File dropped: ${file.name}` },
       ]);
     } else {
       console.log("File exceeds 5 MB size limit.");
     }
-  };  
+  };
 
   const handleFileInputChange = (e) => {
     const file = e.target.files[0];
 
-    if (file && file.size <= 5 * 1024 * 1024) { // 5 MB size limit
-      // Simulating file upload
-      setTimeout(() => {
-        setDialogue([
-          ...dialogue,
-          { user: "User", message: `Upload an Audio: ${file.name}` },
-          { user: "System", message: "Received!" },
-        ]);
-      }, 1000);
+    if (file && file.size <= 5 * 1024 * 1024) {
+      setDialogue([
+        ...dialogue,
+        { user: "User", message: `Upload an Audio: ${file.name}` },
+        { user: "System", message: `File upload: ${file.name}` },
+      ]);
     } else {
       alert("File exceeds 5 MB size limit.");
     }
+  };
+
+  const handleDownload = (fileUrl, fileName) => {
+    const a = document.createElement('a');
+    a.href = fileUrl;
+    a.download = fileName || 'audio.wav';
+    a.click();
+    URL.revokeObjectURL(fileUrl);
   };
 
   return (
@@ -64,6 +117,9 @@ const Dialogue = ({ username }) => {
           {dialogue.map((entry, index) => (
             <div key={index} className={`dialogue-entry ${entry.user.toLowerCase()}`}>
               <strong>{entry.user}:</strong> {entry.message}
+              {entry.fileUrl && (
+                <button onClick={() => handleDownload(entry.fileUrl, entry.message)}>Download</button>
+              )}
             </div>
           ))}
         </div>
@@ -72,8 +128,8 @@ const Dialogue = ({ username }) => {
         <label className="file-upload-btn">
           <input type="file" onChange={handleFileInputChange} />
         </label>
-        <button className="start-btn">Start</button>
-        <button className="stop-btn">Stop</button>
+        <button className="start-btn" onClick={startRecording}>Start</button>
+        <button className="stop-btn" onClick={stopRecording}>Stop</button>
       </div>
     </div>
   );
