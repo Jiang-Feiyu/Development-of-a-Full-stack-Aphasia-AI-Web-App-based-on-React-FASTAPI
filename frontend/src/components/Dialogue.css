@@ -1,0 +1,62 @@
+.dialogue-container {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  padding: 10px;
+  height: 200px;
+  overflow-y: auto;
+}
+
+.dialogue-entry {
+  margin-bottom: 10px;
+  border-radius: 5px;
+  display: flex;
+}
+
+.user {
+  color: #333;
+  align-self: flex-end;
+  background-color: #e6f7ff; /* 用户消息的背景色 */
+  margin-left: 50%; /* 设置一个间距，使消息更加右对齐 */
+}
+
+.system {
+  color: #666;
+  align-self: flex-start;
+  background-color: #f0f0f0; /* 系统消息的背景色 */
+}
+
+.drag-over {
+  border: 2px dashed #666;
+}
+
+/* 新增样式，使系统消息的灰框和文字一样长 */
+.system .message {
+  width: fit-content;
+  box-sizing: border-box;
+}
+
+/* 新增样式，按钮组容器 */
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+/* 调整开始按钮和停止按钮的样式 */
+.start-btn, .stop-btn {
+  background-color: #C4C4C4;
+  color: rgb(0, 0, 0);
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.stop-btn:hover {
+  background-color: #d92424;
+}
+
+.start-btn:hover {
+  background-color: #24d957;
+}
