@@ -81,6 +81,7 @@ def login_user(user: User):
 
 @app.post("/delete")
 def delete_user(user: User):
+    # 请你修改这个路由
     existing_user = next((u for u in users_db if u["usn"] == user.usn), None)
     if not existing_user:
         raise HTTPException(status_code=404, detail="User not found")

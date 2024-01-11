@@ -20,12 +20,34 @@ function User() {
     };
 
     const handleDelete = async () => {
+        alert(username);
+        console.log("Deleting user with username:", username);
         const confirmDelete = window.confirm("Are you sure?");
         if (confirmDelete) {
-            // 请你设计一个请求
+            try {
+                const response = await fetch('http://localhost:8000/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ',  // + YOUR_ACCESS_TOKEN Add your authentication token if needed
+                    },
+                    body: JSON.stringify({
+                        usn: username,
+                    }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(data.message);
+                    navigate("/");
+                } else {
+                    console.error("Error occurred while deleting user:", response.statusText);
+                }
+            } catch (error) {
+                console.error("Error occurred while deleting user:", error.message);
+            }
         }
     };
-    
 
     return (
         <div className="content-box">
@@ -37,7 +59,6 @@ function User() {
                     ))}
                 </ul>
             </div>
-
             <button className="button_sign" onClick={handleLogout}>Logout</button>
             <button className="button_sign" onClick={handleDelete}>Delete the account</button>
             <Dialogue username={username} />
