@@ -8,6 +8,7 @@ import os
 import logging
 from fastapi import Request
 import shutil
+from pydub import AudioSegment
 
 app = FastAPI()
 
@@ -101,12 +102,16 @@ async def upload_file(file: UploadFile = File(...)):
         # Create the path if it doesn't exist
         os.makedirs(save_path, exist_ok=True)
 
-        # Combine the save_path with the filename to get the full save path
-        file_path = os.path.join(save_path, file.filename)
+        # Combine the save_path with the filename and add ".wav" extension
+        file_path = os.path.join(save_path, file.filename.replace(".", "") + ".wav")
 
         # Save the file to the specified path
         with open(file_path, "wb") as f:
             shutil.copyfileobj(file.file, f)
+
+        # Convert the file to WAV format
+        audio = AudioSegment.from_file(file_path, format=file.filename.split('.')[-1])
+        audio.export(file_path, format="wav")
 
         # Process the uploaded file
         # For now, we will just return the file details
