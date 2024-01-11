@@ -1,9 +1,13 @@
-from fastapi import FastAPI, HTTPException, File, UploadFile, Depends, Form
+from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import json
 import os
+import logging
+from fastapi import Request
+import shutil
 
 app = FastAPI()
 
@@ -15,6 +19,31 @@ app.add_middleware(
     allow_methods=["*"],  # 允许所有方法
     allow_headers=["*"],  # 允许所有头部
 )
+
+# 添加 TrustedHostMiddleware，确保正确处理主机头
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
+
+# 配置日志记录
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# 添加请求和响应日志中间件
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """
+    Middleware to log incoming requests and outgoing responses.
+    """
+    logger.info(f"Received request: {request.method} {request.url}")
+    logger.info(f"Request headers: {request.headers}")
+    # logger.info(f"Request body: {await request.body()}")
+    
+    response = await call_next(request)
+    
+    logger.info(f"Sent response: {response.status_code}")
+    logger.info(f"Response headers: {response.headers}")
+    # logger.info(f"Response body: {response.body}")
+
+    return response
 
 class User(BaseModel):
     usn: str
@@ -64,19 +93,23 @@ def delete_user(user: User):
     return {"message": "User deleted successfully"}
 
 @app.post("/upload")
-async def upload_file(user: User, audio_file: UploadFile = File(...)):
-    # 检查用户是否存在
-    existing_user = next((u for u in users_db if u["usn"] == user.usn), None)
-    if not existing_user:
-        raise HTTPException(status_code=404, detail="User not found")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        # Specify the path where you want to save the uploaded files
+        save_path = "./Data"
 
-    # 处理上传的文件
-    file_contents = await audio_file.read()
-    audio_segment = AudioSegment.from_file(io.BytesIO(file_contents))
+        # Create the path if it doesn't exist
+        os.makedirs(save_path, exist_ok=True)
 
-    # 将文件保存为 WAV 格式
-    wav_file_path = f"uploads/{audio_file.filename.split('.')[0]}.wav"
-    audio_segment.export(wav_file_path, format="wav")
+        # Combine the save_path with the filename to get the full save path
+        file_path = os.path.join(save_path, file.filename)
 
-    # 返回 WAV 文件的路径
-    return {"wavFileUrl": wav_file_path}
+        # Save the file to the specified path
+        with open(file_path, "wb") as f:
+            shutil.copyfileobj(file.file, f)
+
+        # Process the uploaded file
+        # For now, we will just return the file details
+        return {"filename": file.filename, "file_size": os.path.getsize(file_path)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

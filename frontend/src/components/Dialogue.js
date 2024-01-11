@@ -54,7 +54,6 @@ const Dialogue = ({ username }) => {
     }
   };
 
-
   const handleDragOver = (e) => {
     e.preventDefault();
     dialogueRef.current.classList.add("drag-over");
@@ -71,11 +70,13 @@ const Dialogue = ({ username }) => {
     const file = e.dataTransfer.files[0];
 
     if (file && file.size <= 5 * 1024 * 1024) {
+      uploadFile(file);
       setDialogue([
         ...dialogue,
         { user: "User", message: `Upload an Audio: ${file.name}` },
         { user: "System", message: `File dropped: ${file.name}` },
       ]);
+      
     } else {
       console.log("File exceeds 5 MB size limit.");
     }
@@ -90,6 +91,9 @@ const Dialogue = ({ username }) => {
         { user: "User", message: `Upload an Audio: ${file.name}` },
         { user: "System", message: `File upload: ${file.name}` },
       ]);
+
+      // Upload the file to the backend
+      uploadFile(file);
     } else {
       alert("File exceeds 5 MB size limit.");
     }
@@ -101,6 +105,30 @@ const Dialogue = ({ username }) => {
     a.download = fileName || 'audio.wav';
     a.click();
     URL.revokeObjectURL(fileUrl);
+  };
+
+  const uploadFile = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:8000/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setDialogue([
+          ...dialogue,
+          { user: "User", message: `File uploaded: ${data.filename}, Size: ${data.file_size} bytes` },
+        ]);
+      } else {
+        console.error('File upload failed');
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
   };
 
   return (
