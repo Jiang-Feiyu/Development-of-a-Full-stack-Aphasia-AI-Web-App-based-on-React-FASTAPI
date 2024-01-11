@@ -19,27 +19,13 @@ function User() {
         navigate("/");
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         const confirmDelete = window.confirm("Are you sure?");
         if (confirmDelete) {
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "http://localhost:8000/delete");
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.onload = () => {
-                if (xhr.status === 200) {
-                    const data = JSON.parse(xhr.responseText);
-                    alert(data.message);
-                    navigate("/");
-                } else {
-                    console.error("Error occurred while deleting user:", xhr.statusText);
-                }
-            };
-            xhr.onerror = () => {
-                console.error("Error occurred while deleting user:", xhr.statusText);
-            };
-            xhr.send(JSON.stringify({ usn: username }));
+            // 请你设计一个请求
         }
     };
+    
 
     return (
         <div className="content-box">

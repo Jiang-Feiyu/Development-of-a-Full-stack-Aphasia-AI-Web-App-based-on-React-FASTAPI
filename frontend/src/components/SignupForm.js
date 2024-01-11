@@ -56,7 +56,7 @@ const SignupForm = () => {
 
     try {
       const response = await fetch('http://localhost:8000/register', {
-        method: 'post',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ usn: username, pwd: password }),
       });
@@ -65,13 +65,15 @@ const SignupForm = () => {
         navigate('/user');
       } else {
         const data = await response.json();
-        alert(`Registration failed: ${data.detail}`);
+        if (response.status === 400 && data.detail === "Username already exists") {
+          alert("Registration failed: Username already exists");
+        } else {
+          alert(`Registration failed: ${data.detail}`);
+        }
       }
     } catch (error) {
       console.log(error);
     }
-
-    navigate("/user");
   };
 
   const generateRandomPassword = () => {
