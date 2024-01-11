@@ -110,18 +110,19 @@ const Dialogue = ({ username }) => {
   const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-
+  
     try {
       const response = await fetch('http://localhost:8000/upload', {
         method: 'POST',
         body: formData,
       });
-
+  
       if (response.ok) {
         const data = await response.json();
         setDialogue([
           ...dialogue,
           { user: "User", message: `File uploaded: ${data.filename}, Size: ${data.file_size} bytes` },
+          { user: "System", message: "File received" }, // 添加新的System对话框
         ]);
       } else {
         console.error('File upload failed');
