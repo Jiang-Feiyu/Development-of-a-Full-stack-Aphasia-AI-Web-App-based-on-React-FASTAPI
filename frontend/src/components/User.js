@@ -20,7 +20,6 @@ function User() {
     };
 
     const handleDelete = async () => {
-        alert(username);
         console.log("Deleting user with username:", username);
         const confirmDelete = window.confirm("Are you sure?");
         if (confirmDelete) {
