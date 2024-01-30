@@ -1,10 +1,10 @@
 [
   {
-    "usn": "admin@hku.hk",
-    "pwd": "&Vq5&0F1hV"
-  },
-  {
     "usn": "abc@abc\\d.com",
     "pwd": "^Rb2V^&7H2$m"
+  },
+  {
+    "usn": "ABC@abc.com",
+    "pwd": "!Lz6k5B^(*9"
   }
 ]

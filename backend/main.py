@@ -65,7 +65,7 @@ def register_user(user: User):
 
     users_db.append({"usn": user.usn, "pwd": user.pwd})
 
-    # 将用户数据写入 JSON 文件
+    # write users' data into JSON file
     with open("users.json", "w") as file:
         json.dump(users_db, file, indent=2)
 
