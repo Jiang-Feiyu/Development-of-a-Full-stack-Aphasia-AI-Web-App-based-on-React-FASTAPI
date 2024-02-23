@@ -119,3 +119,19 @@ async def upload_file(file: UploadFile = File(...)):
         return {"filename": file.filename, "file_size": os.path.getsize(file_path)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+# 修改密码路由
+@app.post("/change-password")
+def change_password(user: User):
+    existing_user = next((u for u in users_db if u["usn"] == user.usn), None)
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # 更新用户密码
+    existing_user["pwd"] = user.pwd
+
+    # 将更新后的用户数据写入 JSON 文件
+    with open("users.json", "w") as file:
+        json.dump(users_db, file, indent=2)
+
+    return {"message": "Password changed successfully"}
