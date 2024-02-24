@@ -9,6 +9,7 @@ import logging
 from fastapi import Request
 import shutil
 from pydub import AudioSegment
+from starlette.responses import JSONResponse
 
 app = FastAPI()
 
@@ -94,6 +95,19 @@ def delete_user(user: User):
 
     return {"message": "User deleted successfully"}
 
+# Maintain a counter to generate sequential file names
+file_counter = 1
+
+# Function to find the next available file number
+def find_next_available_number(directory):
+    file_names = os.listdir(directory)
+    file_numbers = [int(name.split(".")[0]) for name in file_names if name.endswith(".wav") and name.split(".")[0].isdigit()]
+    if file_numbers:
+        return max(file_numbers) + 1
+    else:
+        return 1
+
+# 拖拽/上传文件
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     try:
@@ -103,8 +117,12 @@ async def upload_file(file: UploadFile = File(...)):
         # Create the path if it doesn't exist
         os.makedirs(save_path, exist_ok=True)
 
-        # Combine the save_path with the filename and add ".wav" extension
-        file_path = os.path.join(save_path, file.filename.replace(".", "") + ".wav")
+        # Find the next available file number
+        file_counter = find_next_available_number(save_path)
+
+        # Generate the file name with sequential numbering
+        file_name = f"{file_counter}.wav"
+        file_path = os.path.join(save_path, file_name)
 
         # Save the file to the specified path
         with open(file_path, "wb") as f:
@@ -116,10 +134,12 @@ async def upload_file(file: UploadFile = File(...)):
 
         # Process the uploaded file
         # For now, we will just return the file details
-        return {"filename": file.filename, "file_size": os.path.getsize(file_path)}
+        return {"filename": file_name, "file_size": os.path.getsize(file_path)}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
+        # 使用日志记录详细的错误信息
+        logging.error("An error occurred while uploading the file:", exc_info=True)
+        raise HTTPException(status_code=500, detail="An error occurred while uploading the file. Please check the server logs for more details.")
+
 # 修改密码路由
 @app.post("/change-password")
 def change_password(user: User):
@@ -135,3 +155,6 @@ def change_password(user: User):
         json.dump(users_db, file, indent=2)
 
     return {"message": "Password changed successfully"}
+
+# 前端录制文件
+
