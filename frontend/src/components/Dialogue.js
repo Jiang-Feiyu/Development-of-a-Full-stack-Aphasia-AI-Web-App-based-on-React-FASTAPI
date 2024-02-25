@@ -6,6 +6,7 @@ const Dialogue = ({ username }) => {
   const dialogueRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const audioUrlRef = useRef(null); // 确保定义了 audioUrlRef
 
   const startRecording = () => {
     navigator.mediaDevices.getUserMedia({ audio: true })
@@ -49,6 +50,18 @@ const Dialogue = ({ username }) => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
       console.log("Recording stopped successfully");
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+
+      const formData = new FormData();
+      formData.append('audio_file', audioBlob, 'recording.wav'); // 注意这里的 key 名称必须与后端接收的名称匹配
+
+      fetch('http://localhost:8000/upload-audio', {
+        method: 'POST',
+        body: formData,
+      })
+        .then(response => response.json())
+        .then(data => console.log('Audio uploaded:', data))
+        .catch(error => console.error('Error uploading audio:', error));
     } else {
       console.log("No recording to stop");
     }
@@ -76,7 +89,7 @@ const Dialogue = ({ username }) => {
         { user: "User", message: `Upload an Audio: ${file.name}` },
         { user: "System", message: `File dropped: ${file.name}` },
       ]);
-      
+
     } else {
       console.log("File exceeds 5 MB size limit.");
     }
@@ -110,13 +123,13 @@ const Dialogue = ({ username }) => {
   const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-  
+
     try {
       const response = await fetch('http://localhost:8000/upload', {
         method: 'POST',
         body: formData,
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         setDialogue([

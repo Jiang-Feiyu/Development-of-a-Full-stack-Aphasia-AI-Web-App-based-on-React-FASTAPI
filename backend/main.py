@@ -6,13 +6,18 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import json
 import os
 import logging
+import requests
 from fastapi import Request
 import shutil
 from pydub import AudioSegment
+import aiohttp
 from starlette.responses import JSONResponse
 from VoiceDetectionEngin import *
 
 app = FastAPI()
+
+class AudioURL(BaseModel):
+    url: str
 
 inter_dict = {'0':'我', '1':'要','2':'去', '3':'廁', '4':'所', '5':'返','6':'睡','7':'房', '8':'書', '9':'廚',
               'A':'刷', 'B':'牙','C':'洗', 'D':'面', 'E':'開', 'F':'電','G':'腦','H':'閂', 'I':'燈', 'J':'出',
@@ -168,6 +173,38 @@ def change_password(user: User):
     return {"message": "Password changed successfully"}
 
 # 前端录制文件
+@app.post("/upload-audio")
+async def upload_audio(audio_file: UploadFile = File(...)):
+    try:
+        # 将音频文件保存到服务器
+        print("x")
+        
+        # Specify the path where you want to save the uploaded files
+        save_path = "./Data"
+
+        # Create the path if it doesn't exist
+        os.makedirs(save_path, exist_ok=True)
+
+        # Find the next available file number
+        file_counter = find_next_available_number(save_path)
+
+        # Generate the file name with sequential numbering
+        file_name = f"{file_counter}.wav"
+        file_path = os.path.join(save_path, file_name)
+        
+        print(file_name, file_path)
+
+        # Save the file to the specified path
+        with open(file_path, "wb") as f:
+            shutil.copyfileobj(audio_file.file, f)
+
+        AIanswer = InterpretAI(file_counter)
+        print('APIHost AIanswer (interpret) = ',AIanswer)
+        
+        return JSONResponse(content={"message": "Audio uploaded successfully"})
+    except Exception as e:
+        return JSONResponse(content={"message": f"Error uploading audio: {str(e)}"}, status_code=500)
+
 
 # 翻译音频
 def InterpretAI(audio_id: int):

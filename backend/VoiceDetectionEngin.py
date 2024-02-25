@@ -149,9 +149,10 @@ def load_models_and_pickles(model_paths, pickle_paths):
 # A function to read an audio .wav file and shows the waveform
 def showAudio(file_name):
     waveform1 = []  # 初始化波形数组
-    # print("Speech_Recognition.py: showAudio() version Jan 1,2024 ")  # 打印版本信息
+    print("Speech_Recognition.py: showAudio() version Jan 1,2024 ")  # 打印版本信息
     audio_binary = tf.io.read_file(file_name)  # 读取音频文件的二进制数据
     audio, sampleR = tf.audio.decode_wav(audio_binary)  # 解码音频文件，并获取音频数据和采样率
+    print("next&&&&&&&&&&")
     
     if (sampleR != 48000):  # 如果采样率不是48000（标准采样率）
         print("showAudio(): Conversion is needed. To start now.")  # 打印提示信息，需要进行转换
@@ -576,13 +577,14 @@ def execute_interpret(file_index: int):
     print("mypath is: ", mypath)
     if os.path.exists(mypath):
         waveform1 = showAudio(mypath)
+        print(waveform1)
         xcoords = get_waveform_section_v2(mypath, 2500, 1)
 
         # print('xcoords = ', xcoords)
 
         if len(waveform1) != 0 and xcoords != []:
             xcoordsW = resolve(waveform1, xcoords)
-            # print('#音频片段(xcoordsW)= ', len(xcoordsW) / 2, '  索引', index)
+            print('#音频片段(xcoordsW)= ', len(xcoordsW) / 2, '  索引', index)
 
             if xcoordsW == []:
                 return "..."
