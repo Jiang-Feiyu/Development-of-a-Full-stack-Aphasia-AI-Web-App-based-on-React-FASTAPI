@@ -14,6 +14,13 @@ from VoiceDetectionEngin import *
 
 app = FastAPI()
 
+inter_dict = {'0':'我', '1':'要','2':'去', '3':'廁', '4':'所', '5':'返','6':'睡','7':'房', '8':'書', '9':'廚',
+              'A':'刷', 'B':'牙','C':'洗', 'D':'面', 'E':'開', 'F':'電','G':'腦','H':'閂', 'I':'燈', 'J':'出',
+              'K':'客', 'L':'廳','M':'睇', 'N':'視', 'O':'叫', 'P':'人','Q':'鐘','R':'想', 'S':'上', 'T':'床',
+              'U':'落', 'V':'攞','W':'手', 'X':'機', 'Y':'畀', 'Z':'話',
+              '!':'你', ',':'飲','+':'茶', '(':'唔', ')':'水', '$':'吃','%':'面','#':'飯', '@':'早'
+              }
+
 # 添加 CORS 中间件
 app.add_middleware(
     CORSMiddleware,
@@ -38,13 +45,11 @@ async def log_requests(request: Request, call_next):
     """
     logger.info(f"Received request: {request.method} {request.url}")
     logger.info(f"Request headers: {request.headers}")
-    # logger.info(f"Request body: {await request.body()}")
     
     response = await call_next(request)
     
     logger.info(f"Sent response: {response.status_code}")
     logger.info(f"Response headers: {response.headers}")
-    # logger.info(f"Response body: {response.body}")
 
     return response
 
