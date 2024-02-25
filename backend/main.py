@@ -12,6 +12,7 @@ import shutil
 from pydub import AudioSegment
 import aiohttp
 from starlette.responses import JSONResponse
+import wave
 from VoiceDetectionEngin import *
 
 app = FastAPI()
@@ -118,6 +119,15 @@ def find_next_available_number(directory):
     else:
         return 1
 
+# check whether wav file
+def is_wav(file_path):
+    try:
+        with wave.open(file_path, 'rb') as f:
+            # Check if the file is a WAV file
+            return f.getnchannels() > 0
+    except wave.Error:
+        return False
+    
 # 拖拽/上传文件
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -140,8 +150,9 @@ async def upload_file(file: UploadFile = File(...)):
             shutil.copyfileobj(file.file, f)
 
         # Convert the file to WAV format
-        audio = AudioSegment.from_file(file_path, format=file.filename.split('.')[-1])
-        audio.export(file_path, format="wav")
+        if is_wav(file_path) == False:
+            audio = AudioSegment.from_file(file_path, format=file.filename.split('.')[-1])
+            audio.export(file_path, format="wav")
         
         print("file_counter", file_counter)
         
