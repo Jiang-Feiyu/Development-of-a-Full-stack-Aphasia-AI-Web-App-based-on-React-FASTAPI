@@ -88,7 +88,7 @@ const Dialogue = ({ username }) => {
     if (file && file.size <= 5 * 1024 * 1024) {
       setDialogue([
         ...dialogue,
-        { user: "User", message: `Upload an Audio: ${file.name}` },
+        { user: "User", message: `Upload an Audio` },
         { user: "System", message: `File upload: ${file.name}` },
       ]);
 
@@ -121,8 +121,8 @@ const Dialogue = ({ username }) => {
         const data = await response.json();
         setDialogue([
           ...dialogue,
-          { user: "User", message: `File uploaded: ${data.filename}, Size: ${data.file_size} bytes` },
-          { user: "System", message: data.answer }, // 使用后端返回的消息
+          { user: "User", message: `File uploaded, Size: ${data.file_size} bytes` },
+          { user: "System", message: `Parsing content: ${data.answer}` }, // 使用后端返回的消息
         ]);
       } else {
         console.error('File upload failed');

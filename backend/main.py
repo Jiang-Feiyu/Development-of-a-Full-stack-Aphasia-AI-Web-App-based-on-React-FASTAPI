@@ -145,7 +145,7 @@ async def upload_file(file: UploadFile = File(...)):
         AIanswer = InterpretAI(file_counter)
         print('APIHost AIanswer (interpret) = ',AIanswer)
     
-        return {"answer": AIanswer}
+        return {"filename": file_name, "file_size": os.path.getsize(file_path),"answer": AIanswer}
     except Exception as e:
         # 使用日志记录详细的错误信息
         logging.error("An error occurred while uploading the file:", exc_info=True)
