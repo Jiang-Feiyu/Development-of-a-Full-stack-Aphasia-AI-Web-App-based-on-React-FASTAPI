@@ -122,7 +122,7 @@ const Dialogue = ({ username }) => {
         setDialogue([
           ...dialogue,
           { user: "User", message: `File uploaded: ${data.filename}, Size: ${data.file_size} bytes` },
-          { user: "System", message: "File received" }, // 添加新的System对话框
+          { user: "System", message: data.answer }, // 使用后端返回的消息
         ]);
       } else {
         console.error('File upload failed');

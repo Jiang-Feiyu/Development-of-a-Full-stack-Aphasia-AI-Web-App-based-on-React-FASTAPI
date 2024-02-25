@@ -313,12 +313,14 @@ def findmin(waveform,start_index,end_index):
 def newevaluateResult ( resIDmodel1 , resIDmodel2, DBwordID, DBprob, DBwordID1, DBprob1 ):   
     resIndex1 = findIndex(resIDmodel1)
     resIndex2 = findIndex(resIDmodel2)
+    print("resIndex1", resIndex1, "resIndex2", resIndex2)
     # Get all the valid possible combinations (via the three FOR loops) and associated probabilities
     vOutword1, vOutprob1 = getValid(resIndex1,DBwordID1,DBprob1,0) #model1:cnn_yang1
     vOutword, vOutprob = getValid(resIndex2,DBwordID,DBprob,0) #model2: model6n
     # Combine the two valid lists together
     tOutword = vOutword+vOutword1
     tOutprob = vOutprob+vOutprob1
+    print("tOutword", tOutword, "tOutprob", tOutprob)
     # Combine with the two identified words
     if resIDmodel1 in valid:
         tOutword.append(resIDmodel1)
@@ -568,7 +570,7 @@ def execute_interpret(file_index: int):
     file_chosen = ''
     xcoordsW = []
     
-    print("file_index", file_index)
+    # print("file_index", file_index)
     
     mypath = './Data/'+str(file_index)+'.wav'
     print("mypath is: ", mypath)
@@ -576,11 +578,11 @@ def execute_interpret(file_index: int):
         waveform1 = showAudio(mypath)
         xcoords = get_waveform_section_v2(mypath, 2500, 1)
 
-        print('xcoords = ', xcoords)
+        # print('xcoords = ', xcoords)
 
         if len(waveform1) != 0 and xcoords != []:
             xcoordsW = resolve(waveform1, xcoords)
-            print('#音频片段(xcoordsW)= ', len(xcoordsW) / 2, '  索引', index)
+            # print('#音频片段(xcoordsW)= ', len(xcoordsW) / 2, '  索引', index)
 
             if xcoordsW == []:
                 return "..."
@@ -596,7 +598,7 @@ def execute_interpret(file_index: int):
 
                     filenameW = './RecogData/Iword_' + str(bb) + '_.wav'
 
-                    print('DBwordfile ', bb, ':', filenameW)
+                    # print('DBwordfile ', bb, ':', filenameW)
                     write(filenameW, samplerate, word)
 
                     word_spectrogram = get_new_spectrogram(filenameW, samplerate, 0)
@@ -626,22 +628,22 @@ def execute_interpret(file_index: int):
 
                 if len(FOUNDLIST) == 0:
                     print('无法完全识别语音。可能是以下内容之一：')
-                    DisplayResFull([Model1_Res, Model2_Res])
+                    # DisplayResFull([Model1_Res, Model2_Res])
                     COMBINELIST = "..." + Model1_Res + Model2_Res
                     return COMBINELIST
                 else:
                     if len(FOUNDLIST) == 1:
                         print('最可能的音频：')
-                        DisplayResFull(FOUNDLIST)
+                        # DisplayResFull(FOUNDLIST)
                         return FOUNDLIST[0]
                     if len(FOUNDLIST) == 2:
                         print('两个可能的音频：')
-                        DisplayResFull(FOUNDLIST)
+                        # DisplayResFull(FOUNDLIST)
                         COMBINELIST = FOUNDLIST[0] + FOUNDLIST[1]
                         return COMBINELIST
                     if len(FOUNDLIST) == 3:
                         print('三个可能的音频：')
-                        DisplayResFull(FOUNDLIST)
+                        # DisplayResFull(FOUNDLIST)
                         COMBINELIST = FOUNDLIST[0] + FOUNDLIST[1] + FOUNDLIST[2]
                         return COMBINELIST
             else:

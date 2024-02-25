@@ -145,7 +145,7 @@ async def upload_file(file: UploadFile = File(...)):
         AIanswer = InterpretAI(file_counter)
         print('APIHost AIanswer (interpret) = ',AIanswer)
     
-        return {"filename": file_name, "file_size": os.path.getsize(file_path)}
+        return {"answer": AIanswer}
     except Exception as e:
         # 使用日志记录详细的错误信息
         logging.error("An error occurred while uploading the file:", exc_info=True)
@@ -173,4 +173,13 @@ def change_password(user: User):
 def InterpretAI(audio_id: int):
     print("audio_id", audio_id)
     AIanswer = run_interpret_audio(audio_id)
-    print('APIHost AIanswer (interpret) = ',AIanswer)
+    if AIanswer == "...":
+        return "Parsing failed"
+    elif AIanswer == None:
+        return "Upload failed"
+    else:
+        decoded_string = ''
+        for char in AIanswer:
+            if char in inter_dict:
+                decoded_string += inter_dict[char]
+        return decoded_string
