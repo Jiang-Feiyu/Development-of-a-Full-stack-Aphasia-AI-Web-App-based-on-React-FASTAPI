@@ -502,48 +502,21 @@ def DisplayResFull(full_list):
 	    print('Error: DisplayResFull has more than 6 items.')
 
 # 主函数 - 文字化输入内容
-def execute_interpret(user_id: str, file_index: int, model_id: int):
-    print("Speech_Recognition: execute_interpret()...",f"user_id = { user_id }",f"file_index = { file_index }",f"model_chosen = { model_id }")
-    
-    if model_id == 1: 
-        model_paths = [
+def execute_interpret(file_index: int):
+
+    model_paths = [
             './models/Models-LHo-20230111/cnn_yang1.h5',
             './models/Models-LHo-20230111/model6n.h5'
         ]
-        pickle_paths = [
+    pickle_paths = [
             './models/Models-LHo-20230111/saveDBindex',
             './models/Models-LHo-20230111/saveDBindex1',
             './models/Models-LHo-20230111/saveDBprob',
             './models/Models-LHo-20230111/saveDBprob1',
             './models/Models-LHo-20230111/saveDBwordID',
             './models/Models-LHo-20230111/saveDBwordID1'
-        ]
-    elif model_id == 2:
-        model_paths = [
-            './models/Models-P1-20230207/cnn_yang1.h5',
-            './models/Models-P1-20230207/model6n.h5'
-        ]
-        pickle_paths = [
-            './models/Models-P1-20230207/saveDBindex',
-            './models/Models-P1-20230207/saveDBindex1',
-            './models/Models-P1-20230207/saveDBprob',
-            './models/Models-P1-20230207/saveDBprob1',
-            './models/Models-P1-20230207/saveDBwordID',
-            './models/Models-P1-20230207/saveDBwordID1'
-        ]
-    elif model_id == 3:
-        model_paths = [
-            './models/Models-P2-20230207/cnn_yang1.h5',
-            './models/Models-P2-20230207/model6n.h5'
-        ]
-        pickle_paths = [
-            './models/Models-P2-20230207/saveDBindex',
-            './models/Models-P2-20230207/saveDBindex1',
-            './models/Models-P2-20230207/saveDBprob',
-            './models/Models-P2-20230207/saveDBprob1',
-            './models/Models-P2-20230207/saveDBwordID',
-            './models/Models-P2-20230207/saveDBwordID1'
-        ]
+    ]
+    
     
     # Load models and pickles
     models, pickle_data = load_models_and_pickles(model_paths, pickle_paths)

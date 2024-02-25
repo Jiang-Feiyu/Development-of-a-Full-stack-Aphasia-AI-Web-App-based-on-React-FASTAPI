@@ -10,6 +10,7 @@ from fastapi import Request
 import shutil
 from pydub import AudioSegment
 from starlette.responses import JSONResponse
+from VoiceDetectionEngine import *
 
 app = FastAPI()
 
@@ -131,9 +132,12 @@ async def upload_file(file: UploadFile = File(...)):
         # Convert the file to WAV format
         audio = AudioSegment.from_file(file_path, format=file.filename.split('.')[-1])
         audio.export(file_path, format="wav")
-
+        
         # Process the uploaded file
         # For now, we will just return the file details
+        AIanswer = InterpretAI(file_counter)
+        print('APIHost AIanswer (interpret) = ',AIanswer)
+    
         return {"filename": file_name, "file_size": os.path.getsize(file_path)}
     except Exception as e:
         # 使用日志记录详细的错误信息
@@ -158,3 +162,7 @@ def change_password(user: User):
 
 # 前端录制文件
 
+# 翻译音频
+def InterpretAI(audio_id: int):
+    AIanswer = run_interpret_audio(audio_id)
+    print('APIHost AIanswer (interpret) = ',AIanswer)
