@@ -26,11 +26,17 @@ function Home() {
     setAgree(e.target.checked);
   };
 
-  const handleButtonClick = (path) => {
+  const handleButtonClick = async (path) => {
     if (!agree) {
       alert("Please agree to the terms to continue.");
     } else if (microphonePermission !== 'granted') {
-      alert("Please allow microphone access to continue.");
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        window.location.href = path; // 请求麦克风权限后执行重定向
+      } catch (error) {
+        console.error('Error accessing microphone:', error);
+        alert('Please allow microphone access to continue.');
+      }
     } else {
       // Redirect to login or signup page
       window.location.href = path;
