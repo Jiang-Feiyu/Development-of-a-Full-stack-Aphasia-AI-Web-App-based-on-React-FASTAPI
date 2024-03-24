@@ -1,22 +1,27 @@
-from fastapi import FastAPI, HTTPException, File, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Optional
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-import json
-import os
-import logging
-import requests
-import ffmpeg
-from fastapi import Request
-import shutil
-from pydub import AudioSegment
-import aiohttp
-from starlette.responses import JSONResponse
-import wave
-from pathlib import Path
-import magic
-import subprocess
+def import_libraries():
+    from fastapi import FastAPI, HTTPException, File, UploadFile
+    from fastapi.middleware.cors import CORSMiddleware
+    from pydantic import BaseModel
+    from typing import List, Optional
+    from fastapi.middleware.trustedhost import TrustedHostMiddleware
+    import json
+    import os
+    import logging
+    import requests
+    import ffmpeg
+    from fastapi import Request
+    import shutil
+    from pydub import AudioSegment
+    import aiohttp
+    from starlette.responses import JSONResponse
+    import wave
+    from pathlib import Path
+    import magic
+    import subprocess
+
+    return FastAPI, HTTPException, File, UploadFile, CORSMiddleware, BaseModel, List, Optional, TrustedHostMiddleware, json, os, logging, requests, ffmpeg, Request, shutil, AudioSegment, aiohttp, JSONResponse, wave, Path, magic, subprocess
+
+FastAPI, HTTPException, File, UploadFile, CORSMiddleware, BaseModel, List, Optional, TrustedHostMiddleware, json, os, logging, requests, ffmpeg, Request, shutil, AudioSegment, aiohttp, JSONResponse, wave, Path, magic, subprocess = import_libraries()
 
 from VoiceDetectionEngin import *
 
@@ -48,12 +53,10 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 添加请求和响应日志中间件
+# 添加请求和响应日志中间
+
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    """
-    Middleware to log incoming requests and outgoing responses.
-    """
     logger.info(f"Received request: {request.method} {request.url}")
     logger.info(f"Request headers: {request.headers}")
     
@@ -140,6 +143,57 @@ def is_wav(file_path):
             return f.getnchannels() > 0
     except wave.Error:
         return False
+
+# 在线录制文件路由
+@app.post("/record-audio")
+async def record_audio(audio: UploadFile = File(...)):
+    try:
+
+        # Specify the path where you want to save the uploaded files
+        save_path = "./Data"
+        # Ensure the save path exists, if not, create it
+        Path(save_path).mkdir(parents=True, exist_ok=True)
+
+        # Find the next available file number
+        file_counter = find_next_available_number(save_path)
+        
+        # Generate the temp file name
+        file_name = f"temp.webm"
+        file_path = os.path.join(save_path, file_name)
+        
+        # Generate the file name with sequential numbering
+        wav_file_name = f"{file_counter}.wav"
+        wav_file_path  = os.path.join(save_path, wav_file_name)
+        
+        # Save the audio file
+        with open(file_path, "wb") as f:
+            f.write(await audio.read())
+        
+        # Determine file type
+        file_type = detect_file_type(file_path)
+        print(f"File type: {file_type}")
+        
+        if file_type == "video/webm":
+            print("Converting ...")
+            # Convert webm to wav
+            print(wav_file_path)
+            try:
+                # 使用 FFmpeg 提取音频并将其转换为 WAV 格式
+                subprocess. run(['ffmpeg', '-i', file_path, '-vn', '-acodec', 'pcm_s16le', '-ar', '44100', '-ac', '2', wav_file_path])
+                print("convert sucess")
+                
+            except ffmpeg.Error as e:
+                print(f"ffmpeg error: {e.stderr}")
+                return {"error": f"ffmpeg error: {e.stderr}"}
+            
+        AIanswer = InterpretAI(file_counter)
+        print('APIHost AIanswer (interpret) = ',AIanswer)
+    
+        return {"filename": file_name, "file_size": os.path.getsize(file_path),"answer": AIanswer}
+        
+        
+    except Exception as e:
+        return {"error": f"Error uploading audio: {e}"}
     
 # 拖拽/上传文件
 @app.post("/upload")
@@ -211,53 +265,3 @@ def InterpretAI(audio_id: int):
                 decoded_string += inter_dict[char]
         return decoded_string
     
-# 在线录制文件路由
-@app.post("/record-audio")
-async def record_audio(audio: UploadFile = File(...)):
-    try:
-
-        # Specify the path where you want to save the uploaded files
-        save_path = "./Data"
-        # Ensure the save path exists, if not, create it
-        Path(save_path).mkdir(parents=True, exist_ok=True)
-
-        # Find the next available file number
-        file_counter = find_next_available_number(save_path)
-        
-        # Generate the temp file name
-        file_name = f"temp.webm"
-        file_path = os.path.join(save_path, file_name)
-        
-        # Generate the file name with sequential numbering
-        wav_file_name = f"{file_counter}.wav"
-        wav_file_path  = os.path.join(save_path, wav_file_name)
-        
-        # Save the audio file
-        with open(file_path, "wb") as f:
-            f.write(await audio.read())
-        
-        # Determine file type
-        file_type = detect_file_type(file_path)
-        print(f"File type: {file_type}")
-        
-        if file_type == "video/webm":
-            print("Converting ...")
-            # Convert webm to wav
-            print(wav_file_path)
-            try:
-                # 使用 FFmpeg 提取音频并将其转换为 WAV 格式
-                subprocess. run(['ffmpeg', '-i', file_path, '-vn', '-acodec', 'pcm_s16le', '-ar', '44100', '-ac', '2', wav_file_path])
-                print("convert sucess")
-                
-            except ffmpeg.Error as e:
-                print(f"ffmpeg error: {e.stderr}")
-                return {"error": f"ffmpeg error: {e.stderr}"}
-            
-        AIanswer = InterpretAI(file_counter)
-        print('APIHost AIanswer (interpret) = ',AIanswer)
-    
-        return {"filename": file_name, "file_size": os.path.getsize(file_path),"answer": AIanswer}
-        
-        
-    except Exception as e:
-        return {"error": f"Error uploading audio: {e}"}
