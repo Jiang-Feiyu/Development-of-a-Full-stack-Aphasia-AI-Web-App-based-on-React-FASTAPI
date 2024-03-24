@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import { Link } from "react-router-dom";
 import "./SignupForm.css";
 
@@ -8,8 +8,6 @@ const SignupForm = () => {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
-  const [users, setUsers] = useState([]);
 
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);
@@ -49,10 +47,6 @@ const SignupForm = () => {
       alert("Registration failed. Password format is incorrect.");
       return;
     }
-
-    const data = {
-      plain_password: password,
-    };
 
     try {
       const response = await fetch('http://localhost:8000/register', {
@@ -168,7 +162,6 @@ const SignupForm = () => {
               >Change one
               </button>
             </div>
-            <h1></h1>
             <Link to="/">
               <button className="signup-btn">Back</button>
             </Link>

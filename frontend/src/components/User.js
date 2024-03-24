@@ -7,9 +7,9 @@ function User() {
     const location = useLocation();
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
-    const [password, setPassword] = useState(""); // 新添加的密码状态
-    const [paths, setPaths] = useState([]);
-    const [confirmPassword, setConfirmPassword] = useState(""); // 定义确认密码变量
+    const [password] = useState(""); // 新添加的密码状态
+    const [paths] = useState([]);
+    const [confirmPassword] = useState(""); // 定义确认密码变量
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
