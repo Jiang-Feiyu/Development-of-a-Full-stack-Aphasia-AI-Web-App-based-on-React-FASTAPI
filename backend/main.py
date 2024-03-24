@@ -253,7 +253,11 @@ async def record_audio(audio: UploadFile = File(...)):
                 print(f"ffmpeg error: {e.stderr}")
                 return {"error": f"ffmpeg error: {e.stderr}"}
             
-        else:
-            return {"message": "Audio file uploaded successfully", "file_path": file_path}
+        AIanswer = InterpretAI(file_counter)
+        print('APIHost AIanswer (interpret) = ',AIanswer)
+    
+        return {"filename": file_name, "file_size": os.path.getsize(file_path),"answer": AIanswer}
+        
+        
     except Exception as e:
         return {"error": f"Error uploading audio: {e}"}

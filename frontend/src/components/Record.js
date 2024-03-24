@@ -1,6 +1,7 @@
+// Record.js
 import React, { useState, useRef } from 'react';
 
-const Record = ({ username }) => {
+const Record = ({ updateDialogue, username }) => {
     const [isRecording, setIsRecording] = useState(false);
     const mediaRecorderRef = useRef(null);
     const chunksRef = useRef([]);
@@ -14,17 +15,18 @@ const Record = ({ username }) => {
     };
 
     const startRecording = () => {
-        navigator.mediaDevices.getUserMedia({ audio: true, video: false }) // 显式指定捕获音频，而不捕获视频
+        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
             .then(stream => {
                 mediaRecorderRef.current = new MediaRecorder(stream);
                 mediaRecorderRef.current.ondataavailable = (e) => {
                     chunksRef.current.push(e.data);
                 };
-                chunksRef.current = []; // 清除先前的数据块
+                chunksRef.current = [];
                 mediaRecorderRef.current.start();
                 setIsRecording(true);
+                updateDialogue("Online Audio", "User"); // 添加 "User: Online Audio" 消息
             })
-            .catch(err => console.error('访问麦克风时出错：', err));
+            .catch(err => console.error('Error accessing microphone:', err));
     };
 
 
@@ -39,31 +41,27 @@ const Record = ({ username }) => {
         }
     };
 
-    const uploadAudio = (audioBlob) => {
+    const uploadAudio = async (audioBlob) => {
         const formData = new FormData();
         formData.append('audio', audioBlob, `${username}_recording.wav`);
 
-        // Log form data to check if it's correctly constructed
-        console.log('Form Data:', formData);
-
-        // Log file size and type
-        console.log('File Size:', audioBlob.size);
-        console.log('File Type:', audioBlob.type);
-
-        fetch('http://localhost:8000/record-audio', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to upload audio');
-                }
-                // Handle successful upload
-                console.log('Audio uploaded successfully');
-            })
-            .catch(error => {
-                console.error('Error uploading audio:', error);
+        try {
+            const response = await fetch('http://localhost:8000/record-audio', {
+                method: 'POST',
+                body: formData
             });
+
+            if (!response.ok) {
+                console.error('File upload failed');
+                return;
+            }
+
+            const data = await response.json();
+            updateDialogue(`File uploaded: ${data.filename}, Size: ${data.file_size} bytes`, "System");
+            updateDialogue(data.answer, "System"); // 使用后端返回的消息
+        } catch (error) {
+            console.error('Error uploading audio:', error);
+        }
     };
 
     return (

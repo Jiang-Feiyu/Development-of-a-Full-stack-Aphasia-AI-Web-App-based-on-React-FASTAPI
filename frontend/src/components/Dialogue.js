@@ -1,3 +1,4 @@
+// Dialogue.js
 import React, { useState, useRef } from "react";
 import "./Dialogue.css";
 import Record from './Record';
@@ -5,8 +6,10 @@ import Record from './Record';
 const Dialogue = ({ username }) => {
   const [dialogue, setDialogue] = useState([]);
   const dialogueRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
+
+  const updateDialogue = (message, user) => {
+    setDialogue([...dialogue, { user, message }]);
+  };
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -24,13 +27,13 @@ const Dialogue = ({ username }) => {
     const file = e.dataTransfer.files[0];
 
     if (file && file.size <= 5 * 1024 * 1024) {
-      uploadFile(file);
       setDialogue([
         ...dialogue,
         { user: "User", message: `Upload an Audio: ${file.name}` },
         { user: "System", message: `File dropped: ${file.name}` },
       ]);
-      
+      // Upload the file to the backend
+      uploadFile(file);
     } else {
       console.log("File exceeds 5 MB size limit.");
     }
@@ -45,7 +48,6 @@ const Dialogue = ({ username }) => {
         { user: "User", message: `Upload an Audio: ${file.name}` },
         { user: "System", message: `File upload: ${file.name}` },
       ]);
-
       // Upload the file to the backend
       uploadFile(file);
     } else {
@@ -64,13 +66,13 @@ const Dialogue = ({ username }) => {
   const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-  
+
     try {
       const response = await fetch('http://localhost:8000/upload', {
         method: 'POST',
         body: formData,
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         setDialogue([
@@ -111,7 +113,7 @@ const Dialogue = ({ username }) => {
         <label className="file-upload-btn">
           <input type="file" onChange={handleFileInputChange} />
         </label>
-        <Record username={username}></Record>
+        <Record updateDialogue={updateDialogue} username={username}></Record>
       </div>
     </div>
   );
