@@ -14,7 +14,7 @@ function App() {
         <header className="App-header">
           <div className="header-background" />
           <div className="header-text">
-            <h1>Amazon Web Service for Web Application Development</h1>
+            <h1>Aphasia AI Web App</h1>
           </div>
         </header>
         <div className="content">
