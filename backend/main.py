@@ -7,6 +7,7 @@ import json
 import os
 import logging
 import requests
+import ffmpeg
 from fastapi import Request
 import shutil
 from pydub import AudioSegment
@@ -15,6 +16,8 @@ from starlette.responses import JSONResponse
 import wave
 from pathlib import Path
 import magic
+import subprocess
+
 from VoiceDetectionEngin import *
 
 app = FastAPI()
@@ -211,30 +214,46 @@ def InterpretAI(audio_id: int):
 # 在线录制文件路由
 @app.post("/record-audio")
 async def record_audio(audio: UploadFile = File(...)):
-    print("haha")
-    print("XXXXXXXXXXXXXXXXXXXXXXXXXXXX")
     try:
+
         # Specify the path where you want to save the uploaded files
         save_path = "./Data"
-        # 确保保存路径存在，如果不存在则创建
+        # Ensure the save path exists, if not, create it
         Path(save_path).mkdir(parents=True, exist_ok=True)
-        
-        # 构造文件保存路径
+
         # Find the next available file number
         file_counter = find_next_available_number(save_path)
-
-        # Generate the file name with sequential numbering
-        file_name = f"{file_counter}.mp3"
+        
+        # Generate the temp file name
+        file_name = f"temp.webm"
         file_path = os.path.join(save_path, file_name)
         
-        # 保存音频文件
+        # Generate the file name with sequential numbering
+        wav_file_name = f"{file_counter}.wav"
+        wav_file_path  = os.path.join(save_path, wav_file_name)
+        
+        # Save the audio file
         with open(file_path, "wb") as f:
             f.write(await audio.read())
         
-        # 确定文件类型
+        # Determine file type
         file_type = detect_file_type(file_path)
         print(f"File type: {file_type}")
         
-        return {"message": "Audio file uploaded successfully", "file_path": file_path}
+        if file_type == "video/webm":
+            print("Converting ...")
+            # Convert webm to wav
+            print(wav_file_path)
+            try:
+                # 使用 FFmpeg 提取音频并将其转换为 WAV 格式
+                subprocess. run(['ffmpeg', '-i', file_path, '-vn', '-acodec', 'pcm_s16le', '-ar', '44100', '-ac', '2', wav_file_path])
+                print("convert sucess")
+                
+            except ffmpeg.Error as e:
+                print(f"ffmpeg error: {e.stderr}")
+                return {"error": f"ffmpeg error: {e.stderr}"}
+            
+        else:
+            return {"message": "Audio file uploaded successfully", "file_path": file_path}
     except Exception as e:
         return {"error": f"Error uploading audio: {e}"}
