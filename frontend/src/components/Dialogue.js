@@ -1,58 +1,12 @@
 import React, { useState, useRef } from "react";
 import "./Dialogue.css";
+import Record from './Record';
 
 const Dialogue = ({ username }) => {
   const [dialogue, setDialogue] = useState([]);
   const dialogueRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
-
-  const startRecording = () => {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then((stream) => {
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = (e) => {
-          if (e.data.size > 0) {
-            audioChunksRef.current.push(e.data);
-          }
-        };
-        mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-          const audioUrl = URL.createObjectURL(audioBlob);
-
-          setDialogue([
-            ...dialogue,
-            { user: "User", message: "Start an Audio" },
-            { user: "System", message: "Audio uploaded", fileUrl: audioUrl },
-          ]);
-
-          audioChunksRef.current = [];
-        };
-
-        mediaRecorderRef.current = mediaRecorder;
-
-        // 检查录音是否已经开始
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state === "inactive") {
-          mediaRecorderRef.current.start();
-          console.log("Recording started successfully");
-        } else {
-          console.log("Failed to start recording");
-        }
-      })
-      .catch((error) => {
-        console.error("Error starting recording:", error);
-      });
-  };
-
-  const stopRecording = () => {
-    // 检查录音是否已经停止
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-      mediaRecorderRef.current.stop();
-      console.log("Recording stopped successfully");
-    } else {
-      console.log("No recording to stop");
-    }
-  };
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -157,8 +111,7 @@ const Dialogue = ({ username }) => {
         <label className="file-upload-btn">
           <input type="file" onChange={handleFileInputChange} />
         </label>
-        <button className="start-btn" onClick={startRecording}>Start</button>
-        <button className="stop-btn" onClick={stopRecording}>Stop</button>
+        <Record username={username}></Record>
       </div>
     </div>
   );

@@ -13,6 +13,8 @@ from pydub import AudioSegment
 import aiohttp
 from starlette.responses import JSONResponse
 import wave
+from pathlib import Path
+import magic
 from VoiceDetectionEngin import *
 
 app = FastAPI()
@@ -24,7 +26,7 @@ inter_dict = {'0':'我', '1':'要','2':'去', '3':'廁', '4':'所', '5':'返','6
               'A':'刷', 'B':'牙','C':'洗', 'D':'面', 'E':'開', 'F':'電','G':'腦','H':'閂', 'I':'燈', 'J':'出',
               'K':'客', 'L':'廳','M':'睇', 'N':'視', 'O':'叫', 'P':'人','Q':'鐘','R':'想', 'S':'上', 'T':'床',
               'U':'落', 'V':'攞','W':'手', 'X':'機', 'Y':'畀', 'Z':'話',
-              '!':'你', ',':'飲','+':'茶', '(':'唔', ')':'水', '$':'吃','%':'面','#':'飯', '@':'早'
+              '!':'你', ',':'飲','+':'茶', '(':'唔', ')':'水', '$':'吃','%':'面','#':'飯', '@':'早', '&':'餐'
               }
 
 # 添加 CORS 中间件
@@ -68,6 +70,7 @@ try:
     with open("users.json", "r") as file:
         users_db = json.load(file)
 except FileNotFoundError:
+    print("not file path")
     users_db = []
 
 @app.post("/register")
@@ -107,6 +110,12 @@ def delete_user(user: User):
 
     return {"message": "User deleted successfully"}
 
+# 使用 magic 来检测文件类型
+def detect_file_type(file_path):
+    mime = magic.Magic(mime=True)
+    file_type = mime.from_file(file_path)
+    return file_type
+
 # Maintain a counter to generate sequential file names
 file_counter = 1
 
@@ -123,6 +132,7 @@ def find_next_available_number(directory):
 def is_wav(file_path):
     try:
         with wave.open(file_path, 'rb') as f:
+            print(file_path, "is a wav file")
             # Check if the file is a WAV file
             return f.getnchannels() > 0
     except wave.Error:
@@ -183,40 +193,6 @@ def change_password(user: User):
 
     return {"message": "Password changed successfully"}
 
-# 前端录制文件
-@app.post("/upload-audio")
-async def upload_audio(audio_file: UploadFile = File(...)):
-    try:
-        # 将音频文件保存到服务器
-        print("x")
-        
-        # Specify the path where you want to save the uploaded files
-        save_path = "./Data"
-
-        # Create the path if it doesn't exist
-        os.makedirs(save_path, exist_ok=True)
-
-        # Find the next available file number
-        file_counter = find_next_available_number(save_path)
-
-        # Generate the file name with sequential numbering
-        file_name = f"{file_counter}.wav"
-        file_path = os.path.join(save_path, file_name)
-        
-        print(file_name, file_path)
-
-        # Save the file to the specified path
-        with open(file_path, "wb") as f:
-            shutil.copyfileobj(audio_file.file, f)
-
-        AIanswer = InterpretAI(file_counter)
-        print('APIHost AIanswer (interpret) = ',AIanswer)
-        
-        return JSONResponse(content={"message": "Audio uploaded successfully"})
-    except Exception as e:
-        return JSONResponse(content={"message": f"Error uploading audio: {str(e)}"}, status_code=500)
-
-
 # 翻译音频
 def InterpretAI(audio_id: int):
     print("audio_id", audio_id)
@@ -231,3 +207,34 @@ def InterpretAI(audio_id: int):
             if char in inter_dict:
                 decoded_string += inter_dict[char]
         return decoded_string
+    
+# 在线录制文件路由
+@app.post("/record-audio")
+async def record_audio(audio: UploadFile = File(...)):
+    print("haha")
+    print("XXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+    try:
+        # Specify the path where you want to save the uploaded files
+        save_path = "./Data"
+        # 确保保存路径存在，如果不存在则创建
+        Path(save_path).mkdir(parents=True, exist_ok=True)
+        
+        # 构造文件保存路径
+        # Find the next available file number
+        file_counter = find_next_available_number(save_path)
+
+        # Generate the file name with sequential numbering
+        file_name = f"{file_counter}.mp3"
+        file_path = os.path.join(save_path, file_name)
+        
+        # 保存音频文件
+        with open(file_path, "wb") as f:
+            f.write(await audio.read())
+        
+        # 确定文件类型
+        file_type = detect_file_type(file_path)
+        print(f"File type: {file_type}")
+        
+        return {"message": "Audio file uploaded successfully", "file_path": file_path}
+    except Exception as e:
+        return {"error": f"Error uploading audio: {e}"}
