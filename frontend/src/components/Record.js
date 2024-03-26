@@ -46,7 +46,7 @@ const Record = ({ updateDialogue, username }) => {
         formData.append('audio', audioBlob, `${username}_recording.wav`);
 
         try {
-            const response = await fetch('http://localhost:8000/record-audio', {
+            const response = await fetch('http://3.27.151.169/record-audio', {
                 method: 'POST',
                 body: formData
             });

@@ -68,7 +68,7 @@ const Dialogue = ({ username }) => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:8000/upload', {
+      const response = await fetch('http://3.27.151.169/upload', {
         method: 'POST',
         body: formData,
       });

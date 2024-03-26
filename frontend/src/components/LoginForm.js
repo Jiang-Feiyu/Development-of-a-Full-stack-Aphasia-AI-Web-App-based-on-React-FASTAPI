@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import "./LoginForm.css"; 
+import "./LoginForm.css";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ const LoginForm = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://localhost:8000/login", {
+      const response = await fetch("http://3.27.151.169/login", {
         method: "post",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usn: username, pwd: password }),

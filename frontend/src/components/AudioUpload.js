@@ -18,7 +18,7 @@ const AudioUpload = ({ username }) => {
     formData.append('usn', username);
 
     try {
-      const response = await fetch('http://localhost:8000/upload_audio', {
+      const response = await fetch('http://3.27.151.169/upload_audio', {
         method: 'POST',
         body: formData,
       });

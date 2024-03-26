@@ -26,7 +26,7 @@ function User() {
         const confirmDelete = window.confirm("Are you sure?");
         if (confirmDelete) {
             try {
-                const response = await fetch('http://localhost:8000/delete', {
+                const response = await fetch('http://3.27.151.169/delete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ function User() {
 
         if (newPassword) {
             try {
-                const response = await fetch('http://localhost:8000/change-password', {
+                const response = await fetch('http://3.27.151.169/change-password', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
