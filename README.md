@@ -12,3 +12,4 @@ As there are currently no technological solutions for aiding aphasiac communicat
 
 ## Other version
 - Backend of AWS EC2: https://github.com/Jiang-Feiyu/FAST-API-backend
+- Frontend of AWS EC2: https://github.com/Jiang-Feiyu/React-frontend
